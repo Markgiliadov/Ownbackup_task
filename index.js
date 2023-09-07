@@ -1,5 +1,6 @@
 const express = require("express");
 const { type } = require("express/lib/response");
+const PlaylistClient = require("./PlaylistClient");
 const app = express();
 const port = 3000;
 
@@ -34,10 +35,7 @@ app.get("/", async (req, res) => {
   };
   const is_letter = (a) => a.toLowerCase() !== a.toUpperCase();
   const answer_2 = () => {
-    const str_arr = Object.keys(data).map(
-      (en) => en
-      //   .split(/[\s`!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~]+/)
-    );
+    const str_arr = Object.keys(data).map((en) => en);
     //calc max
     console.log(str_arr);
     const max_length = calc_max(str_arr);
@@ -50,14 +48,6 @@ app.get("/", async (req, res) => {
     for (const st of Arr) {
       if (max_length < st.length) max_length = st.length;
     }
-    // for (const sub_arr of Arr) {
-    //   for (const word of sub_arr) {
-    //     if (word.length > max_length) {
-    //       max_length = word.length;
-    //       //   max_str;
-    //     }
-    //   }
-    // }
     return max_length;
   };
   const post_result_w_length = async () => {
@@ -75,14 +65,30 @@ app.get("/", async (req, res) => {
       .then((res) => res.json())
       .then((json) => json);
   };
-  //   console.log(`${Object.entries(data)}`);
+  const uuid = "9b5e6f3e-5fad-458c-a697-081d00a32a1f";
+  const client = new PlaylistClient(uuid);
 
-  //   console.log(an);
-  //   an.filter((element) => {
-  //     console.log(element.split(/[,\s]+/));
-  //   });
-  //   console.log(an);
-  res.send(`${await post_result_w_length()}`);
+  const songNames = await client.song_names(30, "list_a");
+  console.log(songNames);
+
+  //   const response = await client.submit_songs(songNames);
+  //   console.log(response);
+  const post_answer_3 = async () => {
+    return await fetch(
+      "https://interview.own-backup-dev.com/challenges/first-n-songs",
+      {
+        method: "POST",
+        body: JSON.stringify(songNames),
+        headers: {
+          uuid: "9b5e6f3e-5fad-458c-a697-081d00a32a1f",
+          "Content-Type": "application/json",
+        },
+      }
+    )
+      .then((res) => res.json())
+      .then((json) => console.log(json));
+  };
+  res.send(`${JSON.stringify(await post_answer_3())}`);
 });
 
 app.listen(port, () => {
